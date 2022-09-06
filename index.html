@@ -42,7 +42,7 @@
 							<input
 								id="recipeNameInput"
 								onkeyup="onRecipeNameInputChange(this, event)"
-								onfocus="clearSuggestions()"
+								onfocus="resetSuggestions(this, event)"
 								type="text"
 								placeholder="Title keywords"
 							/>
@@ -62,7 +62,7 @@
 								id="includeIngredient-0"
 								class="includeIngredient"
 								onkeyup="onIngredientInputChange(event)"
-								onfocus="clearSuggestions()"
+								onfocus="resetSuggestions(this, event)"
 								type="text"
 								placeholder="Ingredient"
 							/>
@@ -82,7 +82,7 @@
 								id="excludeIngredient-0"
 								class="excludeIngredient"
 								onkeyup="onIngredientInputChange(event)"
-								onfocus="clearSuggestions()"
+								onfocus="resetSuggestions(this, event)"
 								type="text"
 								placeholder="Ingredient"
 							/>
@@ -94,7 +94,6 @@
 						</div>
 					</div>
 				</div>
-				<div id="suggestions" class="suggestionsColumn"></div>
 			</div>
 			<div class="inputContainer">
 				<button id="submitIngredients" class="submitBtn">Search</button>
@@ -113,6 +112,7 @@
 	</div>
 	<div id="results" class="results topLevelContainer"></div>
 
+	<script type="text/javascript" src="./js/utils.js"></script>
 	<script type="text/javascript" src="./js/favorites.js"></script>
 	<script type="text/javascript" src="./js/multiplier.js"></script>
 	<script type="text/javascript" src="./js/generateRecipeCard.js"></script>
@@ -125,6 +125,12 @@
 	<script type="text/javascript">
 		generateCocktailOfTheDay();
 		animateTotalRecipesCount();
+		document.body.onclick = (event) => {
+			const 
+			if () {
+				clearSuggestions();
+			}
+		}
 	</script>
 </body>
 

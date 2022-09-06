@@ -20,18 +20,25 @@ const allNameTokensSet = new Set(allNameTokens);
 const nameTokens = Array.from(allNameTokensSet);
 
 function clearSuggestions() {
-	const suggestionsContainer = document.getElementById("suggestions");
-	suggestionsContainer.innerHTML = "";
+	const suggestionsContainers = document.getElementsByClassName("suggestionsContainer");
+	if (suggestionsContainers.length > 0) {
+		[...suggestionsContainers].map((suggestionContainer) => suggestionContainer.remove());
+	}
 }
 
-function addSuggestionToInput(input) {
+function resetSuggestions(input) {
+	clearSuggestions();
+	const suggestionsContainer = createSuggestionsContainer();
+	insertAfter(suggestionsContainer, input);
+}
+
+function addSuggestionToContainer(suggestionsContainer, input) {
 	return function addSuggestion(token) {
 		const suggestion = document.createElement("button");
 		suggestion.onclick = () => { input.value = token };
 		suggestion.className = "suggestion";
 		suggestion.innerHTML = "<img class='addSuggestion' src='./img/curved-arrow-left.svg' />"
 			+ "<span>" + token + "<span>";
-		const suggestionsContainer = document.getElementById("suggestions");
 		suggestionsContainer.appendChild(suggestion);
 	}
 }
@@ -42,12 +49,18 @@ function generateSuggestions(input, inputValue, tokens) {
 		token.startsWith(inputValue.toLowerCase())
 	).slice(0, SUGGESTION_COUNT_LIMIT);
 	if (matchingTokens.length > 0) {
-		const suggestionHdr = document.createElement("div");
-		suggestionHdr.className = "suggestionHeader";
-		suggestionHdr.innerHTML = "Suggestions:";
-		const suggestionsContainer = document.getElementById("suggestions");
-		suggestionsContainer.appendChild(suggestionHdr);
-		matchingTokens.forEach(addSuggestionToInput(input));
+		matchingTokens.forEach(addSuggestionToContainer(suggestionsContainer, input));
 	}
 }
 
+function createSuggestionsContainer() {
+	const suggestionHdr = document.createElement("div");
+	suggestionHdr.className = "suggestionHeader";
+	suggestionHdr.innerHTML = "Suggestions:";
+	
+	const suggestionsContainer = document.createElement("div");
+	suggestionsContainer.id = "suggestionsContainer";
+	suggestionsContainer.classList.add("suggestionsContainer");
+	suggestionsContainer.appendChild(suggestionHdr);
+	return suggestionsContainer;
+}

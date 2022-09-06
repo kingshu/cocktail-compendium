@@ -19,7 +19,7 @@ function addNewIngredientInput(input, ingredientType) {
 		newInput.type = "text";
 		newInput.placeholder = "Ingredient";
 		newInput.onkeyup = onIngredientInputChange;
-		newInput.onfocus = clearSuggestions;
+		newInput.onfocus = () => resetSuggestions(input);
 		newInputRow.appendChild(newInput);
 		
 		const newCloseIcon = document.createElement("img");
