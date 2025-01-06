@@ -16,7 +16,10 @@
 	<link rel="stylesheet" type="text/css" href="./css/modal.css" media="screen" />
 	<link rel="stylesheet" type="text/css" href="./css/suggestions.css" media="screen" />
 
+	<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 	<script type="text/javascript" src="./js/lib/balancetext.min.js"></script>
+	<script type="text/javascript" src="./js/lib/caseUtils.js"></script>
+	<script type="text/javascript" src="./js/lib/pipe.js"></script>
 	<script type="text/javascript" src="./js/constants.js"></script>
 	<script type="text/javascript" src="./js/recipes.js"></script>
 </head>
@@ -93,6 +96,24 @@
 							/>
 						</div>
 					</div>
+					<div class="searchCategoryTitle">
+						SEARCH BY THEME
+					</div>
+					<div class="inputGroup">
+						<div class="inputRow">
+							<input
+								id="themeInput"
+								onkeyup="onThemeInputChange(event)"
+								onfocus="createSuggestionsContainer(this)"
+								onblur="removeSuggestions(this)"
+								type="text"
+								placeholder="Theme"
+							/><img
+								class="closeIcon"
+								src="./img/close-icon.svg" onclick="clearInput('themeInput')"
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div class="inputContainer">
@@ -112,7 +133,8 @@
 	</div>
 	<div id="results" class="results topLevelContainer"></div>
 
-	<script type="text/javascript" src="./js/utils.js"></script>
+	<script type="text/javascript" src="./js/modalizeRecipe.js"></script>
+	<script type="text/javascript" src="./js/recipesLayout.js"></script>
 	<script type="text/javascript" src="./js/favorites.js"></script>
 	<script type="text/javascript" src="./js/multiplier.js"></script>
 	<script type="text/javascript" src="./js/generateRecipeCard.js"></script>
@@ -120,12 +142,13 @@
 	<script type="text/javascript" src="./js/animateTotalRecipesCount.js"></script>
 	<script type="text/javascript" src="./js/suggestions.js"></script>
 	<script type="text/javascript" src="./js/formController.js"></script>
-	<script type="text/javascript" src="./js/modalizeRecipe.js"></script>
 	<script type="text/javascript" src="./js/search.js"></script>
 	<script type="text/javascript">
 		generateCocktailOfTheDay();
 		animateTotalRecipesCount();
 	</script>
+	<script type="text/javascript" src="./js/showRequestedCocktail.js"></script>
+	<script type="text/javascript" src="./js/cocktailOfDayNotification.js"></script>
 </body>
 
 <svg class="hiddenSvg linkIcon" version="1.1" id="linkSvg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/2000/xlink" x="0px" y="0px"

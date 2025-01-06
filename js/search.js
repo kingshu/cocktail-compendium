@@ -12,66 +12,82 @@ function submitOnEnterPressed(event) {
 	}
 }
 
-function getNameMatches(list) {
+function getNameMatches() {
 	const searchName = document.getElementById("recipeNameInput").value;
 	if (searchName) {
-		const recipeNameLookupRegex = new RegExp("\\b" + searchName + "\\b", "ig");
-		return list.filter(({ name }) =>
-			recipeNameLookupRegex.test(name)
+		return FUSE_NAME_SEARCH
+			.search(searchName)
+			.map(({ item }) => item);
+	}
+	return recipes;
+}
+
+function getThemeMatches(list) {
+	const searchTheme = document.getElementById("themeInput").value;
+	if (searchTheme) {
+		const themeRegex = new RegExp("\\b" + searchTheme + "\\b", "i");
+		return list.filter(
+			({ themes }) => themes.some(
+				(theme) => themeRegex.test(theme)
+			)
 		);
 	}
 	return list;
 }
 
 function getIngredientRegexes(ingredientType) {
-	const includeIngredientInputs = document.getElementsByClassName(ingredientType);
-	return [...includeIngredientInputs]
+	const ingredientRegexes = document.getElementsByClassName(ingredientType);
+	return [...ingredientRegexes]
 		.filter(({ value }) => value)
 		.map(({ value }) => new RegExp("\\b" + value + "\\b", "i"));
 }
 
-function getIncludeIngredientsMatches(list, regexes, idx) {
-	const ingredientLookupRegex = regexes[idx];
-	if (!ingredientLookupRegex) {
+function getIncludeIngredientsMatches(regexes) {
+	return function getMatches(list) {
+		const nonEmptyRegexes = regexes.filter(Boolean);
+		if (nonEmptyRegexes.length > 0) {
+			return list.filter(
+				({ ingredients }) => regexes.every(
+					(regex) => ingredients.some(
+						({ ingredient }) => regex.test(ingredient)
+					)
+				)
+			);
+		}
 		return list;
 	}
-	const filteredList = list
-		.filter(({ ingredients }) => ingredients.some((ingredient) =>
-		ingredientLookupRegex.test(ingredient)
-	));
-
-	return getIncludeIngredientsMatches(filteredList, regexes, idx+1);
 }
 
-function getExcludeIngredientsMatches(list, regexes, idx) {
-	const ingredientLookupRegex = regexes[idx];
-	if (!ingredientLookupRegex) {
+function getExcludeIngredientsMatches(regexes) {
+	return function getMatches(list) {
+		const nonEmptyRegexes = regexes.filter(Boolean);
+		if (nonEmptyRegexes.length > 0) {
+			return list.filter(
+				({ ingredients }) => ingredients.every(
+					({ ingredient }) => !regexes.some(
+						(regex) => regex.test(ingredient)
+					)
+				)
+			);
+		}
 		return list;
 	}
-
-	const filteredList = list
-		.filter(({ ingredients }) => ingredients.every((ingredient) =>
-		!ingredientLookupRegex.test(ingredient)
-	));
-
-	return getExcludeIngredientsMatches(filteredList, regexes, idx+1);
 }
 
 function search() {
-	const nameMatches = getNameMatches(recipes);
+	const includeIngredientRegexes =
+		getIngredientRegexes(INGREDIENT_TYPE.INCLUDE);
+	const excludeIngredientRegexes =
+		getIngredientRegexes(INGREDIENT_TYPE.EXCLUDE);
+	
+	const searchFn = pipe(
+		getNameMatches,
+		getIncludeIngredientsMatches(includeIngredientRegexes),
+		getExcludeIngredientsMatches(excludeIngredientRegexes),
+		getThemeMatches
+	);
+	const matches = searchFn();
 
-	const includeIngredientRegexes = getIngredientRegexes(INGREDIENT_TYPE.INCLUDE);
-	const includeIngredientsMatches = getIncludeIngredientsMatches(nameMatches, includeIngredientRegexes, 0);
-
-	const excludeIngredientRegexes = getIngredientRegexes(INGREDIENT_TYPE.EXCLUDE);
-	const excludeIngredientsMatches = getExcludeIngredientsMatches(includeIngredientsMatches, excludeIngredientRegexes, 0);
-
-	handleResultsUi(excludeIngredientsMatches);
-};
-
-function handleResultsUi(matches) {
-	const resultContainer = document.getElementById("results");
-	resultContainer.innerHTML = "";
 	const resultsSummary = document.getElementById("resultsSummary");
 	document.getElementById("clearFavoritesActionContainer").classList.add("hidden");
 	if (matches.length == 0) {
@@ -86,23 +102,14 @@ function handleResultsUi(matches) {
 			.filter(isRecipeNotFavorite)
 			.filter(isRecipeNotCocktailOfTheDay)
 			.sort(() => Math.random() - 0.5);
-		[...matchingFavorites, ...matchingCoctailOfTheDay, ...otherMatches]
-			.map((recipe) => generateRecipeCard(recipe))
-			.forEach((recipeCard) => resultContainer.appendChild(recipeCard));
+		const recipes = [
+			...matchingFavorites,
+			...matchingCoctailOfTheDay,
+			...otherMatches
+		];
+		layoutRecipes(recipes);
 		resultsSummary.innerHTML = `Found ${matches.length} cocktail${matches.length === 1 ? "" : "s"}.`;
 	}
-
-	// The following logic uses a library to
-	// split text titles more intelligently.
-	//
-	// Instead of:
-	// | CARAWAY MY WAYWARD |
-	// |        SON         |
-	//
-	// the balanced break does:
-	// |    CARAWAY MY      |
-	// |    WAYWARD SON     |
-	balanceText(".recipeTitle");
-}
+};
 
 submitBtn.onclick = search;
